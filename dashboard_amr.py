@@ -121,7 +121,7 @@ with st.expander("⚙️ Setting Parameter"):
     st.number_input("Banyak Data yang Ditampilkan", key="top_limit", value=50)
 
 # ------------------ Fungsi Cek ------------------ #
-def cek_indikator(row):
+def cek_indikator(row, param):
     indikator = {}
     indikator['arus_hilang'] = all([row['CURRENT_L1'] == 0, row['CURRENT_L2'] == 0, row['CURRENT_L3'] == 0])
     indikator['over_current'] = any([row['CURRENT_L1'] > param['i_over'], row['CURRENT_L2'] > param['i_over'], row['CURRENT_L3'] > param['i_over']])
@@ -155,7 +155,32 @@ with tab1:
     data_path = "data_harian.csv"
     if os.path.exists(data_path):
         df = pd.read_csv(data_path)
-        indikator_list = df.apply(cek_indikator, axis=1)
+
+# ------------------ Ambil parameter threshold dan alias ------------------ #
+param = {k: v for k, v in st.session_state.items() if isinstance(v, (int, float))}
+param['i_over'] = param.get('over_i_tm', 5.0)
+param['i_max'] = param.get('max_i_tm', 100.0)
+param['cos_phi_max'] = param.get('cos_phi_tm', 0.85)
+param['v_over_tm'] = param.get('vmax_tm', 240.0)
+param['v_over_tr'] = param.get('vmax_tr', 241.0)
+param['v_drop_min'] = param.get('low_v_diff_tm', 10.0)
+param['unbalance_tol'] = param.get('unbal_tol_tm', 0.15)
+
+
+# ------------------ Ambil parameter threshold dan alias ------------------ #
+param = {k: v for k, v in st.session_state.items() if isinstance(v, (int, float))}
+param['i_over'] = param.get('over_i_tm', 5.0)
+param['i_max'] = param.get('max_i_tm', 100.0)
+param['cos_phi_max'] = param.get('cos_phi_tm', 0.85)
+param['v_over_tm'] = param.get('vmax_tm', 240.0)
+param['v_over_tr'] = param.get('vmax_tr', 241.0)
+param['v_drop_min'] = param.get('low_v_diff_tm', 10.0)
+param['unbalance_tol'] = param.get('unbal_tol_tm', 0.15)
+
+if 'i_over' not in param:
+    st.warning("⚠️ Parameter 'i_over' tidak ditemukan. Pastikan telah diset.")
+
+indikator_list = df.apply(lambda row: cek_indikator(row, param), axis=1)
         indikator_df = pd.DataFrame(indikator_list.tolist())
         result = pd.concat([df[['LOCATION_CODE']], indikator_df], axis=1)
         result['Jumlah Potensi TO'] = indikator_df.sum(axis=1)
