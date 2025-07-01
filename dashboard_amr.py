@@ -181,7 +181,7 @@ if 'i_over' not in param:
     st.warning("⚠️ Parameter 'i_over' tidak ditemukan. Pastikan telah diset.")
 
 indikator_list = df.apply(lambda row: cek_indikator(row, param), axis=1)
-        indikator_df = pd.DataFrame(indikator_list.tolist())
+indikator_df = pd.DataFrame(indikator_list.tolist())
         result = pd.concat([df[['LOCATION_CODE']], indikator_df], axis=1)
         result['Jumlah Potensi TO'] = indikator_df.sum(axis=1)
         top50 = result.sort_values(by='Jumlah Potensi TO', ascending=False).head(50)
