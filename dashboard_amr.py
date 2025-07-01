@@ -45,6 +45,9 @@ st.set_page_config(page_title="Dashboard TO AMR", layout="wide")
 st.title("📊 Dashboard Target Operasi AMR - P2TL")
 st.markdown("---")
 
+# ------------------ Ambil semua parameter threshold dari session state ------------------ #
+param = {k: v for k, v in st.session_state.items() if isinstance(v, (int, float, float))}
+
 # ------------------ Parameter Threshold Section ------------------ #
 with st.expander("⚙️ Setting Parameter"):
     st.markdown("""
