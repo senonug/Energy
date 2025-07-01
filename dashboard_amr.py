@@ -20,6 +20,11 @@ if not st.session_state['logged_in']:
             else:
                 st.error("Username/password salah")
     st.stop()
+# ------------------ Tombol Logout ------------------ #
+with st.sidebar:
+    if st.button("🚪 Logout"):
+        st.session_state['logged_in'] = False
+        st.experimental_rerun()
 
 # ------------------ Setup ------------------ #
 st.set_page_config(page_title="Dashboard TO AMR", layout="wide")
