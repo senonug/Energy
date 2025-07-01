@@ -21,27 +21,71 @@ if not st.session_state['logged_in']:
                 st.error("Username/password salah")
     st.stop()
 # ------------------ Tombol Logout ------------------ #
-with st.sidebar:
-    if st.button("🚪 Logout"):
-        st.session_state['logged_in'] = False
-        st.experimental_rerun()
+st.markdown("""
+    <style>
+    .logout-button {
+        position: absolute;
+        top: 10px;
+        right: 16px;
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+    }
+    </style>
+    <form action="#" method="post">
+        <button class="logout-button" onclick="window.location.reload();">Logout</button>
+    </form>
+""", unsafe_allow_html=True)
 
 # ------------------ Setup ------------------ #
 st.set_page_config(page_title="Dashboard TO AMR", layout="wide")
 st.title("📊 Dashboard Target Operasi AMR - P2TL")
 st.markdown("---")
 
-# ------------------ Parameter Filter Dinamis ------------------ #
-st.sidebar.header("⚙️ Parameter Filter")
-param = {
-    'cos_phi_max': st.sidebar.number_input("Max Cos Phi", value=0.85),
-    'v_over_tm': st.sidebar.number_input("Over Voltage TM", value=240.0),
-    'v_over_tr': st.sidebar.number_input("Over Voltage TR", value=241.0),
-    'i_over': st.sidebar.number_input("Over Current Threshold", value=100.0),
-    'i_max': st.sidebar.number_input("Arus Maksimum", value=120.0),
-    'v_drop_min': st.sidebar.number_input("Tegangan Drop Minimum (V)", value=10.0),
-    'unbalance_tol': st.sidebar.number_input("% Toleransi Unbalance", value=0.15)
-}
+# ------------------ Parameter Threshold Section ------------------ #
+with st.expander("⚙️ Setting Parameter"):
+    st.markdown("""
+    Operasi Logika yang digunakan di sini adalah **OR**. Dengan demikian, indikator yang sesuai dengan salah satu spesifikasi aturan tersebut akan di-highlight berwarna hijau cerah dan berkontribusi pada perhitungan potensi TO.
+    """)
+
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.markdown("#### Tegangan Drop")
+        st.number_input("Set Batas Atas Tegangan Menengah (tm)", key="v_tm_max", value=56.0)
+        st.number_input("Set Batas Atas Tegangan Rendah (tr)", key="v_tr_max", value=180.0)
+        st.number_input("Set Batas Bawah Arus Besar tm", key="i_tm_min", value=0.5)
+        st.number_input("Set Batas Bawah Arus Besar tr", key="i_tr_min", value=0.5)
+
+    with col2:
+        st.markdown("#### Tegangan Hilang")
+        st.number_input("Nilai Tegangan Menengah Hilang (tm)", key="v_tm_zero", value=0.0)
+        st.number_input("Nilai Tegangan Rendah Hilang (tr)", key="v_tr_zero", value=0.0)
+        st.number_input("Set Batas Bawah Arus Besar tm", key="loss_tm_i", value=-1.0)
+        st.number_input("Set Batas Bawah Arus Besar tr", key="loss_tr_i", value=-1.0)
+
+    with col3:
+        st.markdown("#### Cos Phi Kecil")
+        st.number_input("Cos Phi Max TM", key="cos_phi_tm", value=0.4)
+        st.number_input("Cos Phi Max TR", key="cos_phi_tr", value=0.4)
+        st.number_input("Set Batas Arus Besar tm", key="cos_i_tm", value=0.8)
+        st.number_input("Set Batas Arus Besar tr", key="cos_i_tr", value=0.8)
+
+    with col4:
+        st.markdown("#### Arus Hilang")
+        st.number_input("Set Batas Arus Hilang pada TM", key="loss_i_tm", value=0.02)
+        st.number_input("Set Batas Arus Hilang pada TR", key="loss_i_tr", value=0.02)
+        st.number_input("Set Batas Bawah Arus Maksimum tm", key="max_i_tm", value=1.0)
+        st.number_input("Set Batas Bawah Arus Maksimum tr", key="max_i_tr", value=1.0)
+
+    st.markdown("---")
+    st.markdown("### Kriteria TO")
+    st.number_input("Jumlah Indikator ≥", key="min_indicator", value=1)
+    st.number_input("Jumlah Bobot ≥", key="min_weight", value=2)
+    st.number_input("Banyak Data yang Ditampilkan", key="top_limit", value=50)
+
 
 # ------------------ Fungsi Cek ------------------ #
 def cek_indikator(row):
